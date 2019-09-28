@@ -1,2 +1,7 @@
 # SWE573
-Repository for SWE573 course.
+
+
+This reposiory is created for SWE573 Software Development Practice course.
+
+
+
