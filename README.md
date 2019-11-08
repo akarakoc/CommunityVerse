@@ -1,4 +1,4 @@
-![alt text](https://img.shields.io/github/pipenv/locked/python-version/metabolize/rq-dashboard-on-heroku?color=red)  ![alt text](https://img.shields.io/pypi/djversions/djangorestframework)
+![alt text](https://img.shields.io/github/pipenv/locked/python-version/metabolize/rq-dashboard-on-heroku?color=red)  ![alt text](https://img.shields.io/badge/Django-2.0-blue)
 # Communityverse
 
 
