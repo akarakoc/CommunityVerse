@@ -1,0 +1,71 @@
+{% extends "base.html" %} 
+
+{% block content %}
+  <button type="button" id="Add Datatype" class="btn btn-outline-secondary btn-sm">Add Datatype</button>
+  <div id="Datatypes_list">
+  <br>
+  <br>
+  <b>Community:</b> {{dt_resp.0.relatedCommunity}}
+  <br>
+  <br>
+  <div class="container">
+  <div class="row">
+  {% for dt in dt_resp %}
+  <div class="col-6">
+	<div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <div id="dtunityName" class="left"><h6 class="m-0 font-weight-bold text-primary"><a id="Datatype">{{ dt.name }}</a><p hidden>{{ dt.id }}</p></p></h6></div>
+			<div class="right">{{ dt.dtunityCreationDate }} {{ dt.dtunityCreator }}</div>
+            <div class="dropdown no-arrow">
+                <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					<i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                </a>
+				<button type="button" class="btn btn-primary">Go!</button>
+            </div>
+        </div>
+        <!-- Card Body -->
+        <div class="card-body">
+		<img src="..." alt="..." class="img-thumbnail">
+			{{ dt.name }}<br>
+		</div>
+    </div>
+	</div>   
+{% endfor %}
+  </div>
+<!-- Modal -->
+	<div class="modal fade" id="dtunityModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="dtunityModalTitle"></h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div id="dtunityModalBody" class="modal-body">
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-primary">Save changes</button>
+				</div>
+			</div>
+		</div>
+	</div>
+<div class="pagination">
+    <span class="step-links">
+        {% if dt_resp.has_previous %}
+            <a href="http://18.219.3.42:8000/community/sendDatatypePage/?showDataTypes={{dt_resp.0.relatedCommunity}}&page=1">&laquo; first</a>
+            <a href="http://18.219.3.42:8000/community/sendDatatypePage/?showDataTypes={{dt_resp.0.relatedCommunity}}&page={{ dt_resp.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ dt_resp.number }} of {{ dt_resp.paginator.num_pages }}.
+        </span>
+
+        {% if dt_resp.has_next %}
+            <a href="http://18.219.3.42:8000/community/sendDatatypePage/?showDataTypes={{dt_resp.0.relatedCommunity}}&page={{ dt_resp.next_page_number }}">next</a>
+            <a href="http://18.219.3.42:8000/community/sendDatatypePage/?showDataTypes={{dt_resp.0.relatedCommunity}}&page={{ dt_resp.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+</div></div> 
+{% endblock %}
