@@ -7,9 +7,12 @@
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/sb-admin-2.min.css' %}">
   <link rel="stylesheet" href="{% static 'css/sb-admin-2.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/jquery.tagsinput.css' %}">
+  
   <script type="text/javascript" src="{% static 'jquery/jquery.min.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/sb-admin-2.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/jquery.tagsinput.js' %}"></script>
   <style>
   </style>
 </head>
@@ -76,8 +79,98 @@ $( document ).ready(function() {
 		$('#CommunityModal').modal('show');
 	});
 	
+	$( "#AddDatatype" ).click(function() {
+		var requestFormData={Form:"Yes"};
+		var communityForm = $.zResponse("/community/sendDatatypeForm",requestFormData);
+		$('#DatatypeModalBody').html(communityForm);
+		$('#datatypeModalTitle').html("Add New Datatype");
+		$('#DatatypeModal').modal('show');
+	});
+	
+
+	var tagSearch = function() {
+		$.ajax({
+            url: "/community/searchTag",
+            data: {
+				'search_text' : $('#id_Community_Name').val(),
+				'csrfmiddlewaretoken' : $("input[name=csrfmiddlewaretoken]").val()
+			},
+			type: "GET",
+            dataType: "html",
+            success: searchResult
+        });			
+	};	
+	function searchResult(data, textStatus, jqXHR){
+		$('#id_Community_Tags').val(data.trim());
+	}
+	$("body").on('keyup', "#id_Community_Name", tagSearch);
+	$('#id_Community_Tags').tagsInput({width:'auto'});
+	//////////////////////////////////////////////////
+	//////////////////////////////////////////////////
+	var tagSearchDt = function() {
+		$.ajax({
+            url: "/community/searchTag",
+            data: {
+				'search_text' : $('#id_Datatype_Name').val(),
+				'csrfmiddlewaretoken' : $("input[name=csrfmiddlewaretoken]").val()
+			},
+			type: "GET",
+            dataType: "html",
+            success: searchResultDt
+        });			
+	};	
+	function searchResultDt(data, textStatus, jqXHR){
+		$('#id_Datatype_Tags').val(data.trim());
+	}
+	$("body").on('keyup', "#id_Datatype_Name", tagSearchDt);
+	$('#id_Datatype_Tags').tagsInput({width:'auto'});
+	
+	
+	$('#createCommunity').submit(function(event){
+			event.preventDefault();
+			var data = new FormData($('#createCommunity').get(0));
+			console.log($("input[name=csrfmiddlewaretoken]").val());
+			$.ajax({
+				type:'POST',
+				url: '/community/CreateCommunity/',
+				data: data,
+				processData: false,
+				contentType: false,
+				dataType: "html",
+				success: CommunityCreateResult			
+			});
+	});
+	
+	function CommunityCreateResult(data, textStatus, jqXHR){
+		$('#communityModalBody').html(data);
+	}
+	//////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////
+	
+		$('#createDatatype').submit(function(event){
+			event.preventDefault();
+			var data = new FormData($('#createCommunity').get(0));
+			console.log($("input[name=csrfmiddlewaretoken]").val());
+			$.ajax({
+				type:'POST',
+				url: '/community/CreateCommunity/',
+				data: data,
+				processData: false,
+				contentType: false,
+				dataType: "html",
+				success: CommunityCreateResult			
+			});
+	});
+	
+	function CommunityCreateResult(data, textStatus, jqXHR){
+		$('#communityModalBody').html(data);
+	}
+	
+	//////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////
+	
 	$( 'p' ).click(function() {
-		var Cname = $(this).text();
+		var Cname = $(this).attr('hash');
 		console.log(Cname)
 		var datatypeParam={showDataTypes:Cname};
 		var dt = $.zResponse("/community/sendDatatypePage",datatypeParam);
@@ -106,6 +199,7 @@ $( document ).ready(function() {
 		$('#CommunityModalTitle').html("Edit Data Types");
 		$('#CommunityModal').modal('show');
 	});
+	
 });
 
 </script>
@@ -123,7 +217,7 @@ $( document ).ready(function() {
           <!-- Topbar Search -->
           <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
             <div class="input-group">
-              <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
+              <input id="searchBar" type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
               <div class="input-group-append">
                 <button class="btn btn-primary" type="button">
                   <i class="fas fa-search fa-sm"></i>
@@ -158,12 +252,12 @@ $( document ).ready(function() {
             <!-- Nav Item - User Information -->
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Ali Karakoc</span>
+                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{user}}</span>
                 <img class="img-profile rounded-circle" src="">
               </a>
               <!-- Dropdown - User Information -->
               <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                <a class="dropdown-item" href="#">
+                <a class="dropdown-item" href="/community/profile">
                   <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                   Profile
                 </a>
@@ -176,9 +270,9 @@ $( document ).ready(function() {
                   Activity Log
                 </a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                <a class="dropdown-item" href="/community/logout">
                   <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                  Logout
+				  Logout
                 </a>
               </div>
             </li>

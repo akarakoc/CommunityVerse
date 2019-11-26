@@ -18,17 +18,16 @@ class communityUsers(models.Model):
     def __str__(self):        
         return self.nickName	
 
-
-
 class Communities(models.Model):
     name = models.CharField(max_length=200, null=True, help_text='Enter community name')
     description = models.CharField(max_length=200, null=True, help_text='Enter community description')	
     communityHash = models.CharField(max_length=200, null=True, help_text='Enter community hash')	
     communityPrv = models.BooleanField(default=False)	
-    communityPhoto = models.CharField(max_length=200, null=True, help_text='community photo')	
-    communityPopularity = models.CharField(max_length=200, null=True, help_text='community private or not')
+    communityPhoto = models.CharField(max_length=200, null=True, help_text='community photo')
+    communityPopularity = models.IntegerField(null=True)
     communityCreator = models.ForeignKey(communityUsers, related_name='creator',on_delete=models.SET_NULL, null=True)
     communityMembers = models.ManyToManyField(communityUsers, related_name='members', help_text='Select members')
+    communityTags = models.CharField(max_length=2000, null=True, help_text='Enter community Tags')
     communityCreationDate= models.DateTimeField(null=True)	
     def __str__(self):
         return self.name
@@ -39,6 +38,8 @@ class Datatypes(models.Model):
     relatedCommunity = models.ForeignKey(Communities, help_text='Select related community',on_delete=models.SET_NULL, null=True)
     datatypeCreationDate= models.DateTimeField(null=True)
     datatypePhoto = models.CharField(max_length=200, null=True, help_text='datatype photo')
+    datatypeTags = models.CharField(max_length=2000, null=True, help_text='Enter datatype Tags')
+    datatypeHash = models.CharField(max_length=200, null=True, help_text='Enter datatype hash')
     def __str__(self):
         return self.name
 		
