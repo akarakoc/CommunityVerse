@@ -1,0 +1,64 @@
+from django.db import models
+
+
+class Communities(models.Model):
+    """Model representing a book genre."""
+    name = models.CharField(max_length=200, null=True, help_text='Enter a book genre (e.g. Science Fiction)')
+
+    def __str__(self):
+        """String for representing the Model object."""
+        return self.name
+
+    """Model representing a book genre."""
+    description = models.CharField(max_length=200, null=True, help_text='Enter a book genre (e.g. Science Fiction)')
+
+    def __str__(self):
+        """String for representing the Model object."""
+        return self.description
+
+class Datatypes(models.Model):
+    """Model representing a book genre."""
+    name = models.CharField(max_length=200, null=True, help_text='Enter a book genre (e.g. Science Fiction)')
+
+    def __str__(self):
+        """String for representing the Model object."""
+        return self.name
+
+    """Model representing a book genre."""
+    PRIMITIVE_TYPES = (
+        ('m', 'Maintenance'),
+        ('o', 'On loan'),
+        ('a', 'Available'),
+        ('r', 'Reserved'),
+    )
+
+    type = models.CharField(
+        choices=PRIMITIVE_TYPES,
+        max_length=5,
+        blank=True,
+        help_text='Primitive Data Type',
+    )
+
+    def __str__(self):
+        """String for representing the Model object."""
+        return self.type
+
+
+
+
+class Posts(models.Model):
+    """Model representing a book genre."""
+    name = models.CharField(max_length=200, null=True, help_text='Enter a book genre (e.g. Science Fiction)')
+
+    def __str__(self):
+        """String for representing the Model object."""
+        return self.name
+
+class Primitives(models.Model):
+    """Model representing a book genre."""
+    name = models.CharField(max_length=200, null=True, help_text='Enter a book genre (e.g. Science Fiction)')
+
+    def __str__(self):
+        """String for representing the Model object."""
+        return self.name
+

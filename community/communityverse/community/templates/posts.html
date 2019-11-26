@@ -1,0 +1,64 @@
+{% extends "base.html" %} 
+
+{% block content %}
+  <button type="button" id="Add_Post" class="btn btn-outline-secondary btn-sm">Add Post</button>
+  <button type="button" id="Edit_Post" class="btn btn-outline-secondary btn-sm">Edit Datatypes</button>
+  <br>
+  <br>
+  <b>Datatype:</b> {{ Datatype_name.0 }}
+  <br>
+  <br>
+  <div id="Datatypes_list">
+  <table class="table">
+  {% for hd in table_fields %}
+	<th>{{ hd }}</th>
+  {% endfor %}
+  {% for dt in post_resp %}
+	<tr>
+		 <td>{{ dt.1.name }}</td>
+		 <td>{{ dt.1.Height }}</td>
+		 <td>{{ dt.1.image }}</td>
+		 <td>{{ dt.1.Location }}</td>
+	</tr>
+  {% endfor %}
+  </table>
+	<!-- Modal -->
+	<div class="modal fade" id="CommunityModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="CommunityModalTitle"></h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div id="communityModalBody" class="modal-body">
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-primary">Save changes</button>
+				</div>
+			</div>
+		</div>
+	</div>
+    
+
+
+<div class="pagination">
+    <span class="step-links">
+        {% if post_resp.has_previous %}
+            <a href="http://18.219.3.42:8000/community/sendPostPage/?showPosts={{ Datatype_Id }}&page=1">&laquo; first</a>
+            <a href="http://18.219.3.42:8000/community/sendPostPage/?showPosts={{ Datatype_Id }}&page={{ post_resp.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ post_resp.number }} of {{ post_resp.paginator.num_pages }}.
+        </span>
+
+        {% if post_resp.has_next %}
+            <a href="http://18.219.3.42:8000/community/sendPostPage/?showPosts={{ Datatype_Id }}&page={{ post_resp.next_page_number }}">next</a>
+            <a href="http://18.219.3.42:8000/community/sendPostPage/?showPosts={{ Datatype_Id }}&page={{ post_resp.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+</div></div>
+{% endblock %}
