@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, get_user_model
 from django import forms
+from community.models import Primitives
 
 class UsersLoginForm(forms.Form):
 	username = forms.CharField()
@@ -138,3 +139,135 @@ class AddDatatype(forms.Form):
 		Datatype_Tags = self.cleaned_data.get("Datatype Tags")
 		Datatype_Image = self.cleaned_data.get("Datatype Image")
 		return super(AddDatatype, self).clean(*args, **keyargs)
+
+
+class AddTextEntryEnum(forms.Form):
+	name = forms.CharField(label='')
+	Types = forms.ModelChoiceField(queryset=Primitives.objects.filter(name="Enumeration").order_by('name'),label='', to_field_name="name")
+	Required = forms.BooleanField(initial=False, required=False, label='')
+	ShowPage = forms.BooleanField(initial=False, required=False, label='')
+	Enum = forms.CharField(label='')
+	def __init__(self, *args, **kwargs):
+		super(AddTextEntryEnum, self).__init__(*args, **kwargs)
+		self.fields['name'].widget.attrs.update({'class': 'form-control'})
+		self.fields['Types'].widget.attrs.update({'class': 'form-control'})
+		self.fields['Enum'].widget.attrs.update({'class': 'form-control'})
+
+class AddTextEntry(forms.Form):
+	name = forms.CharField(label='')
+	Types = forms.ModelChoiceField(queryset=Primitives.objects.all().exclude(name="Enumeration").order_by('name'),label='', to_field_name="name")
+	Required = forms.BooleanField(initial=False, required=False, label='')
+	ShowPage = forms.BooleanField(initial=False, required=False, label='')
+	def __init__(self, *args, **kwargs):
+		super(AddTextEntry, self).__init__(*args, **kwargs)
+		self.fields['name'].widget.attrs.update({'class': 'form-control'})
+		self.fields['Types'].widget.attrs.update({'class': 'form-control'})
+		
+class SendPrimitives(forms.Form):
+	Types = forms.ModelChoiceField(queryset=Primitives.objects.all().order_by('name'),label='')	
+	def __init__(self, *args, **kwargs):
+		super(SendPrimitives, self).__init__(*args, **kwargs)
+		self.fields['Types'].widget.attrs.update({'class': 'form-control'})
+		
+class AddTextPost(forms.Form):
+	TextEntry = forms.CharField(label='')
+	def __init__(self, *args, **kwargs):
+		super(AddTextEntry, self).__init__(*args, **kwargs)
+		self.fields['TextEntry'].widget.attrs.update({'class': 'form-control'})
+		
+		
+class AddTextAreaPost(forms.Form):
+	TextAreaEntry = forms.CharField(widget=forms.Textarea(attrs={'width':"50%", 'cols' : "50", 'rows': "2",}),label='')
+	def __init__(self, *args, **kwargs):
+		super(TextAreaEntry, self).__init__(*args, **kwargs)
+		self.fields['TextAreaEntry'].widget.attrs.update({'class': 'form-control'})
+	
+class AddImagePost(forms.Form):
+	ImageEntry = forms.ImageField(label='')
+	def __init__(self, *args, **kwargs):
+		super(ImageEntry, self).__init__(*args, **kwargs)
+		self.fields['ImageEntry'].widget.attrs.update({'class': 'form-control'})
+	
+class AddAudioPost(forms.Form):
+	AudioEntry = forms.FileField(label='')
+	def __init__(self, *args, **kwargs):
+		super(AudioEntry, self).__init__(*args, **kwargs)
+		self.fields['AudioEntry'].widget.attrs.update({'class': 'form-control'})
+	
+class AddVideoPost(forms.Form):
+	VideoEntry = forms.FileField(label='')
+	def __init__(self, *args, **kwargs):
+		super(VideoEntry, self).__init__(*args, **kwargs)
+		self.fields['VideoEntry'].widget.attrs.update({'class': 'form-control'})
+	
+class AddBooleanPost(forms.Form):
+	BooleanEntry = forms.BooleanField(initial=False, required=False, label='')
+	def __init__(self, *args, **kwargs):
+		super(BooleanEntry, self).__init__(*args, **kwargs)
+		self.fields['BooleanEntry'].widget.attrs.update({'class': 'form-control'})
+	
+class AddEmailPost(forms.Form):
+	EmailEntry = forms.EmailField(label='')
+	def __init__(self, *args, **kwargs):
+		super(EmailEntry, self).__init__(*args, **kwargs)
+		self.fields['EmailEntry'].widget.attrs.update({'class': 'form-control'})
+	
+class AddIpAddressPost(forms.Form):
+	IpAddressEntry = forms.GenericIPAddressField(label='')
+	def __init__(self, *args, **kwargs):
+		super(IpAddressEntry, self).__init__(*args, **kwargs)
+		self.fields['IpAddressEntry'].widget.attrs.update({'class': 'form-control'})
+		
+class AddUrlPost(forms.Form):
+	UrlEntry = forms.URLField(label='')
+	def __init__(self, *args, **kwargs):
+		super(UrlEntry, self).__init__(*args, **kwargs)
+		self.fields['UrlEntry'].widget.attrs.update({'class': 'form-control'})
+	
+class AddDatePost(forms.Form):
+	DateEntry = forms.DateField(label='')
+	def __init__(self, *args, **kwargs):
+		super(DateEntry, self).__init__(*args, **kwargs)
+		self.fields['DateEntry'].widget.attrs.update({'class': 'form-control'})
+	
+class AddTimePost(forms.Form):
+	TimeEntry = forms.TimeField(label='')
+	def __init__(self, *args, **kwargs):
+		super(TimeEntry, self).__init__(*args, **kwargs)
+		self.fields['TimeEntry'].widget.attrs.update({'class': 'form-control'})
+	
+class AddDateTimePost(forms.Form):
+	DateTimeEntry = forms.DateTimeField(label='')
+	def __init__(self, *args, **kwargs):
+		super(DateTimeEntry, self).__init__(*args, **kwargs)
+		self.fields['DateTimeEntry'].widget.attrs.update({'class': 'form-control'})
+	
+class AddIntegerPost(forms.Form):
+	IntegerEntry = forms.IntegerField(label='')
+	def __init__(self, *args, **kwargs):
+		super(IntegerEntry, self).__init__(*args, **kwargs)
+		self.fields['IntegerEntry'].widget.attrs.update({'class': 'form-control'})
+	
+class AddDecimalPost(forms.Form):
+	DecimalEntry = forms.DecimalField(label='')
+	def __init__(self, *args, **kwargs):
+		super(DecimalEntry, self).__init__(*args, **kwargs)
+		self.fields['DecimalEntry'].widget.attrs.update({'class': 'form-control'})
+	
+class AddFloatPost(forms.Form):
+	FloatEntry = forms.FloatField(label='')
+	def __init__(self, *args, **kwargs):
+		super(FloatEntry, self).__init__(*args, **kwargs)
+		self.fields['FloatEntry'].widget.attrs.update({'class': 'form-control'})
+	
+class AddEnumaratedPost(forms.Form):
+	EnumaratedEntry = forms.ModelChoiceField(queryset=Primitives.objects.all().order_by('name'),label='')
+	def __init__(self, *args, **kwargs):
+		super(EnumaratedEntry, self).__init__(*args, **kwargs)
+		self.fields['EnumaratedEntry'].widget.attrs.update({'class': 'form-control'})
+
+class AddLocationPost(forms.Form):	
+	LocationEntry = forms.CharField(label='')
+	def __init__(self, *args, **kwargs):
+		super(LocationEntry, self).__init__(*args, **kwargs)
+		self.fields['LocationEntry'].widget.attrs.update({'class': 'form-control'})

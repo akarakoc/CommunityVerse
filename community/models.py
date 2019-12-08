@@ -44,13 +44,14 @@ class Datatypes(models.Model):
         return self.name
 		
 class DatatypeFields(models.Model):
-    name = models.CharField(max_length=200, null=True, help_text='Enter ypur datatype')
+    name = models.CharField(max_length=200, null=True, help_text='Enter your datatype')
     relatedDatatype = models.ForeignKey(Datatypes, help_text='Select related datatype', on_delete=models.SET_NULL, null=True)
     relatedComm = models.ForeignKey(Communities, help_text='Select related datatype', on_delete=models.SET_NULL, null=True)
     fieldCreator = models.ForeignKey(communityUsers, on_delete=models.SET_NULL, null=True)
     fieldCreationDate= models.DateTimeField(null=True)
     fieldRequired = models.BooleanField(default=False)
     fronttableShow = models.BooleanField(default=False)
+    enumerations = models.CharField(max_length=200, null=True, help_text='Enter the Enumerations')
     relatedPrimitives = models.ForeignKey(Primitives, help_text='Select related primitive', on_delete=models.SET_NULL, null=True)
     def __str__(self):
         return self.name  

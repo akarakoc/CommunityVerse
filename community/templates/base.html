@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="{% static 'css/sb-admin-2.min.css' %}">
   <link rel="stylesheet" href="{% static 'css/sb-admin-2.min.css' %}">
   <link rel="stylesheet" href="{% static 'css/jquery.tagsinput.css' %}">
+  <link rel="stylesheet" href="{% static 'fontawesome-free/css/all.min.css' %}">
   
   <script type="text/javascript" src="{% static 'jquery/jquery.min.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
@@ -147,58 +148,186 @@ $( document ).ready(function() {
 	//////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////
 	
-		$('#createDatatype').submit(function(event){
+	$('#createDatatype').submit(function(event){
 			event.preventDefault();
-			var data = new FormData($('#createCommunity').get(0));
-			console.log($("input[name=csrfmiddlewaretoken]").val());
+			var data = new FormData($('#createDatatype').get(0));
+			data.append('community_Hash', '{{community_Hash}}');
+			data.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
+			//console.log($("input[name=csrfmiddlewaretoken]").val());
 			$.ajax({
 				type:'POST',
-				url: '/community/CreateCommunity/',
+				url: '/community/CreateDatatype/',
 				data: data,
 				processData: false,
 				contentType: false,
 				dataType: "html",
-				success: CommunityCreateResult			
+				success: DatatypeCreateResult			
 			});
 	});
 	
-	function CommunityCreateResult(data, textStatus, jqXHR){
-		$('#communityModalBody').html(data);
+	function DatatypeCreateResult(data, textStatus, jqXHR){
+		$('#DatatypeModalBody').html(data);
 	}
 	
 	//////////////////////////////////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////////////////////////////////
 	
-	$( 'p' ).click(function() {
+	$( '.classC' ).click(function() {
 		var Cname = $(this).attr('hash');
-		console.log(Cname)
 		var datatypeParam={showDataTypes:Cname};
 		var dt = $.zResponse("/community/sendDatatypePage",datatypeParam);
 		window.location = '/community/sendDatatypePage/?showDataTypes='+Cname;							
 	});
 	
-	$( 'a' ).click(function() {
-		var Dtname = $(this).siblings("p")[0].innerHTML;
-		var PostParam={showPost:Dtname};
+	$( '.classD' ).click(function() {
+		var Dtname = $(this).attr('hash');
+		var PostParam={showPosts:Dtname};
 		var dt = $.zResponse("/community/sendPostPage",PostParam);
 		window.location = '/community/sendPostPage/?showPosts='+Dtname;							
 	});
 	
-	$( '#Edit_Post' ).click(function() {
-		var htmlText='<table class="table"><tr><th>name</th><th>PrimitiveType</th><th>Required</th><th>Show on List</th><tr>';
-		{% for tf in table_fields %}
-			htmlText += '<tr>';
-			htmlText += '<td>{{tf.name}}</td>';
-			htmlText += '<td>{{tf.relatedPrimitives}}</td>';
-			htmlText += '<td>{{tf.fieldRequired}}</td>';
-			htmlText += '<td>{{tf.fronttableShow}}</td>';
-			htmlText += '</tr>';
-		{% endfor %}
-		htmlText += '</table>';
-		$('#communityModalBody').html(htmlText);
-		$('#CommunityModalTitle').html("Edit Data Types");
-		$('#CommunityModal').modal('show');
+	$( '#Edit_Primitive' ).click(function() {
+		event.preventDefault();
+		var data = new FormData();
+		data.append('CommunityHash', '{{ Community_Name.0.communityHash}}');
+		data.append('DatatypeHash', '{{ Datatype_Name.0.datatypeHash }}');
+		data.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
+		$.ajax({
+			type:'POST',
+			url: '/community/ShowDatatypeFields/',
+			data: data,
+			processData: false,
+			contentType: false,
+			dataType: "html",
+			success: DatatypeFields			
+		});
 	});
+	
+	function DatatypeFields(data, textStatus, jqXHR){
+		$('#CommunityModalTitle').html("Edit Data Types");
+		$('#communityModalBody').html(data);
+		$('input[name="name"]').attr('readonly', true);
+		$('#CommunityModal').modal('show');
+	}
+	
+	$('#Add_Primitive').submit(function(event){
+			event.preventDefault();
+			var data = new FormData($('#Add_Primitive').get(0));
+			data.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
+			$.ajax({
+				type:'POST',
+				url: '/community/EditDataytpe/',
+				data: data,
+				processData: false,
+				contentType: false,
+				dataType: "html",
+				success: PrimitiveResult
+			});
+	});
+
+	function PrimitiveResult(data, textStatus, jqXHR){
+		$(data).appendTo($("#communityModalBody")).show( "slow" );
+		var time = (new Date).getTime();
+		$('#SavePrimitive').attr("id",time);
+		$('#SavePrimitiveButton').attr("id",time);
+		$('#SavePrimitiveButton').attr("id",time);		
+	}
+	
+	
+	$(document).on ("click", "[updateClass]", function (event) {
+		selectedID=$(this).attr('id');
+		event.preventDefault();
+		var data = new FormData($('#'+ selectedID).get(0));
+		data.append('CommunityHash', '{{ Community_Name.0.communityHash}}');
+		data.append('DatatypeHash', '{{ Datatype_Name.0.datatypeHash }}');
+		data.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
+		$.ajax({
+			type:'POST',
+			url: '/community/SavePrimitives/',
+			data: data,
+			idval: selectedID,
+			processData: false,
+			contentType: false,
+			dataType: "html",
+			success: function(data, textStatus, jqXHR){
+				alert(data)
+				if (data.trim() == "Data is saved!"){
+					$( "button[id="+this.idval+"][updateClass='true']" ).html( '<i class="fa fa-check-circle" style="font-size:24px"></i>' );
+				}
+			}		
+		});
+    });
+	
+	$(document).on ("click", "[removeClass]", function (event) {
+		selectedID=$(this).attr('id');
+		event.preventDefault();
+		var data = new FormData($('#'+ selectedID).get(0));
+		data.append('CommunityHash', '{{ Community_Name.0.communityHash}}');
+		data.append('DatatypeHash', '{{ Datatype_Name.0.datatypeHash }}');
+		data.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
+		$.ajax({
+			type:'POST',
+			url: '/community/DeleteDatatypeFields/',
+			data: data,
+			idval: selectedID,
+			processData: false,
+			contentType: false,
+			dataType: "html",
+			success: function(data, textStatus, jqXHR){
+				alert(data)
+				if (data.trim() == "Datatype is Deleted Successfully!"){
+					jQuery('#'+this.idval).remove();
+				}
+			}		
+		});
+    });
+
+	$(document).on ("click", "[editClass]", function (event) {
+		selectedID=$(this).attr('id');
+		event.preventDefault();
+		var data = new FormData($('#'+ selectedID).get(0));
+		data.append('CommunityHash', '{{ Community_Name.0.communityHash}}');
+		data.append('DatatypeHash', '{{ Datatype_Name.0.datatypeHash }}');
+		data.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
+		$.ajax({
+			type:'POST',
+			url: '/community/EditDatatypeFields/',
+			data: data,
+			idval: selectedID,
+			processData: false,
+			contentType: false,
+			dataType: "html",
+			success: function(data, textStatus, jqXHR){
+				alert(data)
+			}		
+		});
+    });
+	
+	
+	$(document).on ("click", "[deleteClass]", function (event) {
+		selectedID=$(this).attr('id');
+		jQuery('#'+selectedID).remove();
+    });
+	
+	$(document).on ("click", "#Add_Post", function (event) {
+		event.preventDefault();
+		var data = new FormData();
+		data.append('CommunityHash', '{{ Community_Name.0.communityHash}}');
+		data.append('DatatypeHash', '{{ Datatype_Name.0.datatypeHash }}');
+		data.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
+		$.ajax({
+			type:'POST',
+			url: '/community/ReturnPostFields/',
+			data: data,
+			processData: false,
+			contentType: false,
+			dataType: "html",
+			success: function(data, textStatus, jqXHR){
+				alert(data)
+			}		
+		});
+		//$('#AddPost').modal('show');
+    });
 	
 });
 

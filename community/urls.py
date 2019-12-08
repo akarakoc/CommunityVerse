@@ -17,4 +17,10 @@ urlpatterns = [
 	path('CreateCommunity/', views.CreateCommunity_view, name = "CreateCommunity"),
 	path('sendDatatypeForm/', views.datatypeForm, name = "Call datatype form"),
 	path('CreateDatatype/', views.CreateDatatype_view, name = "CreateDatatype"),
+	path('EditDataytpe/', views.EditDatatype_view, name = "EditDatatype"),
+	path('SavePrimitives/', views.SavePrimitives_view, name = "SavePrimitives"),
+	path('ShowDatatypeFields/', views.ShowDatatypeFields_view, name = "ShowDatatypeFields"),
+	path('DeleteDatatypeFields/', views.DeleteDatatypeFields_view, name = "DeleteDatatypeFields"),
+	path('EditDatatypeFields/', views.EditDatatypeFields_view, name = "EditDatatypeFields"),
+	path('ReturnPostFields/', views.ReturnPostFields_view, name = "ReturnPostFields"),	
 ]

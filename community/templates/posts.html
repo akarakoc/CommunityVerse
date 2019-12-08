@@ -1,11 +1,24 @@
-{% extends "base.html" %} 
+  <style>
+.modal-dialog,
+.modal-content {
+    /* 80% of window height */
+    height: 80%;
+	width: 90%;
+}
 
+.modal-body {
+    /* 100% = dialog height, 120px = header + footer */
+    max-height: calc(100% - 120px);
+    overflow-y: scroll;
+}
+  </style>
+  {% extends "base.html" %} 
 {% block content %}
   <button type="button" id="Add_Post" class="btn btn-outline-secondary btn-sm">Add Post</button>
-  <button type="button" id="Edit_Post" class="btn btn-outline-secondary btn-sm">Edit Datatypes</button>
+  <button type="button" id="Edit_Primitive" class="btn btn-outline-secondary btn-sm">Edit Datatypes</button>
   <br>
   <br>
-  <b>Datatype:</b> {{ Datatype_name.0 }}
+  <b>{{ Community_Name.0.name }} > {{ Datatype_Name.0.name }}</b> 
   <br>
   <br>
   <div id="Datatypes_list">
@@ -24,7 +37,7 @@
   </table>
 	<!-- Modal -->
 	<div class="modal fade" id="CommunityModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-		<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-dialog  modal-dialog-centered modal-lg" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title" id="CommunityModalTitle"></h5>
@@ -32,17 +45,69 @@
 						<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
+				<div class="container">
+					<div class="row p-3" id="PrimitiveTable">
+						<div class="col-sm-2">
+							Name
+						</div>
+						<div class="col-sm-2">
+							Type
+						</div>
+						<div class="col-sm-2">
+							Required
+						</div>
+						<div class="col-sm-2">
+							Show
+						</div>
+						<div class="col-sm-2">
+							Enumerations
+						</div>
+						<div class="col-sm-2">
+							Action
+						</div>
+					</div>  
+				</div>
 				<div id="communityModalBody" class="modal-body">
 				</div>
-				<div class="modal-footer">
+				<div class="modal-footer justify-content-between">
+					<form method="post" action="" id="Add_Primitive" enctype="multipart/form-data">
+						{% csrf_token %}
+						<div id="AddPrimitives" class="p-3">
+							<button type="submit" class="btn btn-outline-primary mr-auto"><i class="fa fa-plus" aria-hidden="true"></i> Add New</button>
+							<input type="checkbox" name="Enumeration" id="enumcheck"><label for="enumcheck">Enumeration?</label> 				
+						</div>
+					</form>	
 					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-					<button type="button" class="btn btn-primary">Save changes</button>
 				</div>
 			</div>
 		</div>
 	</div>
-    
 
+
+<!-- Modal -->
+	<div class="modal fade" id="AddPost" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+		<div class="modal-dialog  modal-dialog-centered modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="AddPostTitle"></h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div id="AddPostBody" class="modal-body">
+				</div>
+				<div class="modal-footer justify-content-between">
+					<form method="post" action="" id="Add_Primitive" enctype="multipart/form-data">
+						{% csrf_token %}
+						<div id="AddPrimitives" class="p-3">
+							<button type="submit" class="btn btn-outline-primary mr-auto"><i class="fa fa-plus" aria-hidden="true"></i> Submit Post</button>
+						</div>
+					</form>	
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
 
 <div class="pagination">
     <span class="step-links">
@@ -62,3 +127,4 @@
     </span>
 </div></div>
 {% endblock %}
+
