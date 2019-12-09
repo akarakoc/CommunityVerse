@@ -65,6 +65,7 @@ class Posts(models.Model):
     propertyValue = models.CharField(max_length=200, null=True, help_text='Enter name of type')
     postCreator = models.ForeignKey(communityUsers,on_delete=models.SET_NULL, null=True)
     postCreationDate= models.DateTimeField(null=True)
+    postTag= models.CharField(max_length=200, null=True, help_text='Enter Post Tags')
     def __str__(self):
         return self.propertyValue
 

@@ -22,5 +22,6 @@ urlpatterns = [
 	path('ShowDatatypeFields/', views.ShowDatatypeFields_view, name = "ShowDatatypeFields"),
 	path('DeleteDatatypeFields/', views.DeleteDatatypeFields_view, name = "DeleteDatatypeFields"),
 	path('EditDatatypeFields/', views.EditDatatypeFields_view, name = "EditDatatypeFields"),
-	path('ReturnPostFields/', views.ReturnPostFields_view, name = "ReturnPostFields"),	
+	path('ReturnPostFields/', views.ReturnPostFields_view, name = "ReturnPostFields"),
+	path('CreatePost/', views.CreatePost_view, name = "CreatePost"),	
 ]

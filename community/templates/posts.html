@@ -3,7 +3,6 @@
 .modal-content {
     /* 80% of window height */
     height: 80%;
-	width: 90%;
 }
 
 .modal-body {
@@ -14,7 +13,7 @@
   </style>
   {% extends "base.html" %} 
 {% block content %}
-  <button type="button" id="Add_Post" class="btn btn-outline-secondary btn-sm">Add Post</button>
+  <button type="button" id="Add_Post" class="btn btn-outline-secondary btn-sm">Add Entry</button>
   <button type="button" id="Edit_Primitive" class="btn btn-outline-secondary btn-sm">Edit Datatypes</button>
   <br>
   <br>
@@ -22,16 +21,24 @@
   <br>
   <br>
   <div id="Datatypes_list">
-  <table class="table">
-  {% for hd in table_fields %}
-	<th>{{ hd }}</th>
-  {% endfor %}
-  {% for dt in post_resp %}
+  <table class="table table-striped">
+  {% for posts in post_resp %}
 	<tr>
-		 <td>{{ dt.1.name }}</td>
-		 <td>{{ dt.1.Height }}</td>
-		 <td>{{ dt.1.image }}</td>
-		 <td>{{ dt.1.Location }}</td>
+		{% for key,val in posts.1.items %}<div class="row">
+		 <td>
+			<div class="row">
+				<div class="col-sm-15">
+					<b>{{ key }}:&nbsp</b>
+					 {{ val }}
+				</div>
+			</div>
+		</td>
+		{% endfor %}
+		<td>
+			<div class="col-sm-2">
+				<button type="button" id ="" class="btn btn-outline-secondary"><i class="fa fa-trash" style="font-size:24px" aria-hidden="true"></i></button>
+			</div>
+		</td>
 	</tr>
   {% endfor %}
   </table>
@@ -83,26 +90,22 @@
 		</div>
 	</div>
 
-
-<!-- Modal -->
+ 
+<!-- Modal Post -->
 	<div class="modal fade" id="AddPost" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-		<div class="modal-dialog  modal-dialog-centered modal-lg" role="document">
+		<div class="modal-dialog  modal-dialog-centered modal" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title" id="AddPostTitle"></h5>
+					<h5 class="modal-title" id="AddPostTitle">Add Entry</h5>
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
 				<div id="AddPostBody" class="modal-body">
 				</div>
-				<div class="modal-footer justify-content-between">
-					<form method="post" action="" id="Add_Primitive" enctype="multipart/form-data">
+				<div class="modal-footer justify-content-between">				
 						{% csrf_token %}
-						<div id="AddPrimitives" class="p-3">
-							<button type="submit" class="btn btn-outline-primary mr-auto"><i class="fa fa-plus" aria-hidden="true"></i> Submit Post</button>
-						</div>
-					</form>	
+					<button type="submit" id="SubmitEntry" class="btn btn-outline-primary mr-auto"><i class="fa fa-plus" aria-hidden="true"></i> Submit Post</button>
 					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
 				</div>
 			</div>

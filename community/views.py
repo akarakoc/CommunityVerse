@@ -137,7 +137,8 @@ def CreateDatatype_view(request):
 def PostPage(request):
     if request.user.is_authenticated:
         DatatypeResult = Datatypes.objects.filter(datatypeHash=request.GET.get('showPosts'))
-        DatatypeId = DatatypeResult[0].id
+        DatatypeHash = DatatypeResult[0].datatypeHash
+        DatatypeId = DatatypeResult[0].id		
         RCommunityFilter = DatatypeResult[0].relatedCommunity
         RCommunity = Communities.objects.filter(name=RCommunityFilter.name)
         Primitive_List = DatatypeResult[0].datatypefields_set.all()
@@ -148,7 +149,7 @@ def PostPage(request):
         paginator = Paginator(posts, 5)
         page = request.GET.get('page')
         post_resp = paginator.get_page(page)
-        return render(request, 'posts.html', {'post_resp': post_resp,'table_fields':Primitive_List,'Datatype_Id':DatatypeId, 'Datatype_Name':DatatypeResult, 'Community_Name': RCommunity})
+        return render(request, 'posts.html', {'post_resp': post_resp,'table_fields':Primitive_List,'Datatype_Id':DatatypeHash, 'Datatype_Name':DatatypeResult, 'Community_Name': RCommunity})
     else:
         return HttpResponseRedirect("/community/login")
 
@@ -284,23 +285,101 @@ def ReturnPostFields_view(request):
     DatatypeHash = request.POST.get("DatatypeHash")
     Dt = Datatypes.objects.filter(datatypeHash=DatatypeHash)[0]
     PostFields = DatatypeFields.objects.filter(relatedDatatype=Dt)
+    iter=0
+    context={}
     for fields in PostFields:
-        if fields.enumerations:
+        if fields.enumerations is not None:
             name = fields.name
             types = fields.relatedPrimitives.name
             req = fields.fieldRequired
             show = fields.fronttableShow
             enum = fields.enumerations
-            return render_to_response('tagSearch.html', {'form' : "Datatype is created Successfully!"})
+            enumList = enum.split(",")				
+            context[fields.name]=AddEnumaratedPost(en=enumList,nm=name)			
         else:
+            if fields.relatedPrimitives.name == "Text":
+                context[fields.name]=AddTextPost()
+            elif fields.relatedPrimitives.name == "TextArea":
+                context[fields.name]=AddTextAreaPost()
+            elif fields.relatedPrimitives.name == "Audio":
+                context[fields.name]=AddAudioPost(request.POST, request.FILES)
+            elif fields.relatedPrimitives.name == "Boolean":
+                context[fields.name]=AddBooleanPost()
+            elif fields.relatedPrimitives.name == "Date":
+                context[fields.name]=AddDatePost()
+            elif fields.relatedPrimitives.name == "DateTime":
+                context[fields.name]=AddDateTimePost()
+            elif fields.relatedPrimitives.name == "Decimal":
+                context[fields.name]=AddDecimalPost()
+            elif fields.relatedPrimitives.name == "E-mail":
+                context[fields.name]=AddEmailPost()
+            elif fields.relatedPrimitives.name == "Float":
+                context[fields.name]=AddFloatPost()
+            elif fields.relatedPrimitives.name == "IP Address":
+                context[fields.name]=AddIpAddressPost()
+            elif fields.relatedPrimitives.name == "Image":
+                context[fields.name]=AddImagePost(request.POST, request.FILES)
+            elif fields.relatedPrimitives.name == "Integer":
+                context[fields.name]=AddIntegerPost()
+            elif fields.relatedPrimitives.name == "Location":
+                context[fields.name]=AddLocationPost()
+            elif fields.relatedPrimitives.name == "Time":
+                context[fields.name]=AddTimePost()
+            elif fields.relatedPrimitives.name == "URL":
+                context[fields.name]=AddUrlPost()
+            elif fields.relatedPrimitives.name == "Video":
+                context[fields.name]=AddVideoPost(request.POST, request.FILES)
             name = fields.name
             types = fields.relatedPrimitives.name
             req = fields.fieldRequired
             show = fields.fronttableShow
-            return render_to_response('tagSearch.html', {'form' : name+types+str(show)+str(req)+"Datatype is created Successfully!"})
+            context["Tags"]=AddTextAreaPost()
+        iter += 1
+    return render_to_response('entryReturnFields.html', {'form' : context})
+
+def handle_uploaded_postfile(f):
+    filepath = 'community/static/uploads/posts/'+f.name
+    with open(filepath, 'wb+') as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+    return "/"+filepath.split("/")[1]+"/"+filepath.split("/")[2]+"/"+filepath.split("/")[3]+"/"+filepath.split("/")[4]+"/"
 	
 def CreatePost_view(request):
-    return render_to_response('tagSearch.html', {'form' : "Datatype is created Successfully!"})
+    CommunityHash = request.POST.get("CommunityHash")
+    DatatypeHash = request.POST.get("DatatypeHash")
+    Dt = Datatypes.objects.filter(datatypeHash=DatatypeHash)[0]
+    PostFields = DatatypeFields.objects.filter(relatedDatatype=Dt)
+    salt = uuid.uuid4().hex
+    PostHash = hashlib.sha256(salt.encode() + request.POST.get(PostFields[0].name).encode()).hexdigest() + salt
+    PostTime = datetime.now() 
+    for fields in PostFields:
+        if (fields.relatedPrimitives.name == "Image" or fields.relatedPrimitives.name == "Audio" or fields.relatedPrimitives.name == "Video") and request.POST.get(fields.name) != "":
+            p_image=request.FILES.get(fields.name)
+            file_path=handle_uploaded_postfile(p_image)
+            entry = Posts()
+            entry.propertyName = fields.name
+            entry.propertyValue = file_path
+            entry.relatedDatatypes = Datatypes.objects.get(datatypeHash=DatatypeHash)
+            entry.relatedCommunityforPost = Communities.objects.get(communityHash=CommunityHash)
+            entry.entryHash = PostHash
+            entry.postCreator = communityUsers.objects.get(nickName=request.user)
+            entry.postCreationDate = PostTime
+            entry.save()
+        elif request.POST.get(fields.name) != "":
+            entry = Posts()
+            entry.propertyName = fields.name
+            entry.propertyValue = request.POST.get(fields.name)
+            entry.relatedDatatypes = Datatypes.objects.get(datatypeHash=DatatypeHash)
+            entry.relatedCommunityforPost = Communities.objects.get(communityHash=CommunityHash)
+            entry.entryHash = PostHash
+            entry.postCreator = communityUsers.objects.get(nickName=request.user)
+            entry.postCreationDate = PostTime
+            entry.save()
+        else:
+            if fields.fieldRequired == True:
+                return render_to_response('tagSearch.html', {'form' : fields.name+" is required!"})
+    return render_to_response('tagSearch.html', {'form' : "The Entry is Created Successflly"})
+    
 	
 
 def login_view(request):

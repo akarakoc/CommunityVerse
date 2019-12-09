@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Bootstrap Example</title>
+  <title>Communityverse</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   {% load static %}
@@ -204,7 +204,7 @@ $( document ).ready(function() {
 	});
 	
 	function DatatypeFields(data, textStatus, jqXHR){
-		$('#CommunityModalTitle').html("Edit Data Types");
+		$('#CommunityModalTitle').html("Edit Datatypes");
 		$('#communityModalBody').html(data);
 		$('input[name="name"]').attr('readonly', true);
 		$('#CommunityModal').modal('show');
@@ -322,12 +322,61 @@ $( document ).ready(function() {
 			processData: false,
 			contentType: false,
 			dataType: "html",
-			success: function(data, textStatus, jqXHR){
-				alert(data)
+			success: function(data, textStatus, jqXHR){				
+				$('#AddPostBody').html(data);
+				$('#AddPost').modal('show');
 			}		
 		});
-		//$('#AddPost').modal('show');
     });
+	
+	$(document).on ("click", "#SubmitEntry", function (event) {
+		event.preventDefault();
+		$("div[entryInput='yes']").each(function() {
+			new_name=$(this).attr("id");
+			$(this).find('.form-control').attr('name',new_name)
+			$(this).find("input").attr('name',new_name)
+		});
+		
+		$("option").each(function() {
+			(new_name=$(this).text())
+			$(this).attr('value',new_name)
+		});
+		var data = new FormData($('#AddEntry').get(0));
+		data.append('CommunityHash', '{{ Community_Name.0.communityHash}}');
+		data.append('DatatypeHash', '{{ Datatype_Name.0.datatypeHash }}');
+		data.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
+		$.ajax({
+			type:'POST',
+			url: '/community/CreatePost/',
+			data: data,
+			processData: false,
+			contentType: false,
+			dataType: "html",
+			success: function(data, textStatus, jqXHR){
+				alert(data);
+				$('#AddPost').modal('hide');
+			}		
+		});
+    });
+	
+	var tagSearchPt = function() {
+		$.ajax({
+            url: "/community/searchTag",
+            data: {
+				'search_text' : $('#id_TextEntry').val(),
+				'csrfmiddlewaretoken' : $("input[name=csrfmiddlewaretoken]").val()
+			},
+			type: "GET",
+            dataType: "html",
+            success: searchResultDt
+        });			
+	};	
+	function searchResultDt(data, textStatus, jqXHR){
+		$('#id_Datatype_Tags').val(data.trim());
+	}
+	$("body").on('keyup', "#id_Datatype_Name", tagSearchPt);
+	$('#id_Datatype_Tags').tagsInput({width:'auto'});
+
 	
 });
 
@@ -382,7 +431,7 @@ $( document ).ready(function() {
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{user}}</span>
-                <img class="img-profile rounded-circle" src="">
+                <img class="img-profile rounded-circle" src="{% static 'uploads/profiles/default.jpg' %}">
               </a>
               <!-- Dropdown - User Information -->
               <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
