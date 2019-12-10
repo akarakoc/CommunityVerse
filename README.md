@@ -3,7 +3,7 @@
 
 
 <p align="center">
-  <img width="460" height="300" src="https://github.com/akarakoc/SWE573/blob/master/UML/logo.png">
+  <img width="460" height="100" src="https://github.com/akarakoc/SWE573/blob/master/UML/logo.png">
 </p>
 
 This repository is created for Communityverse application.
