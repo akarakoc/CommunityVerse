@@ -12,7 +12,8 @@ from .forms import UsersRegisterForm
 from .forms import AddCommunity
 from .forms import AddDatatype
 from .forms import SendPrimitives
-from .forms import AddTextEntry, AddTextEntryEnum, AddTextPost, AddTextAreaPost, AddImagePost, AddAudioPost, AddVideoPost, AddBooleanPost, AddEmailPost, AddIpAddressPost, AddUrlPost, AddDatePost, AddTimePost, AddDateTimePost, AddIntegerPost, AddDecimalPost, AddFloatPost, AddEnumaratedPost, AddLocationPost
+from .forms import AddTextEntry, AddTextEntryEnum, AddTagPost, AddTextPost, AddTextAreaPost, AddImagePost, AddAudioPost, AddVideoPost, AddBooleanPost, AddEmailPost, AddIpAddressPost, AddUrlPost, AddDatePost, AddTimePost, AddDateTimePost, AddIntegerPost, AddDecimalPost, AddFloatPost, AddEnumaratedPost, AddLocationPost
+from .forms import AddTextEntry, AddTextEntryEnum, AddTagSearch, AddTextSearch, AddTextAreaSearch, AddImageSearch, AddAudioSearch, AddVideoSearch, AddBooleanSearch, AddEmailSearch, AddIpAddressSearch, AddUrlSearch, AddDateSearch, AddTimeSearch, AddDateTimeSearch, AddIntegerSearch, AddDecimalSearch, AddFloatSearch, AddEnumaratedSearch, AddLocationSearch
 from django.contrib.auth import logout
 from django.http import HttpResponseRedirect
 from django.http import JsonResponse
@@ -26,24 +27,90 @@ import requests
 import uuid
 import hashlib
 from datetime import datetime
-from community.models import Primitives,communityUsers,Communities,Datatypes,DatatypeFields,Posts
+from community.models import Primitives,communityUsers,Communities,Datatypes,DatatypeFields,Posts,CommunityTags,DatatTypeTags,PostTags,UserTags
 
+
+
+def saveTagSearch_view(src):
+    SEARCHPAGE = src	
+    PARAMS = {
+		"action":"wbsearchentities",
+		"format": "json",
+		"limit": "10",
+        "language":"en",
+		"search": SEARCHPAGE
+    }
+    Srch = requests.Session()
+    URL = "https://wikidata.org/w/api.php"
+    Res = Srch.get(url=URL, params=PARAMS)
+    DATA = Res.json()['search']
+    titles = ""
+    items = ""
+    for tt in DATA:
+        titles = titles + tt['label']+","
+        items = items + tt['id']+","		
+    return {'TITLE' : titles, "ITEM" : items}
+
+def saveTag_view(returneditems):
+    looping = returneditems.replace("#",",").split(",")
+    titles=""
+    items=""		
+    for iter in looping:
+        if iter is not '':
+            resp=saveTagSearch_view(iter)
+            try:				
+                titles = titles + resp["TITLE"]
+                items = items + resp["ITEM"]
+            except:
+                print("!")
+    print({'TITLE' : titles, "ITEM" : items})	
+    return {'TITLE' : titles, "ITEM" : items}
+	
 def LoginPage(request):
     return render(request, 'login.html', {'community_resp': 'test'}) 
 
 def index(request):
     if request.user.is_authenticated:
-        Community_List = Communities.objects.all()
+        Community_List = Communities.objects.all().order_by('-communityCreationDate')
+        Cuser = request.user
+        UserList = communityUsers.objects.filter(nickName=Cuser)[0]		
+        User_communities = UserList.members.all()
         paginator = Paginator(Community_List, 3)
         page = request.GET.get('page')
         community_resp = paginator.get_page(page)
-        return render(request, 'index.html', {'community_resp': community_resp})
+        return render(request, 'index.html', {'community_resp': community_resp, 'User_communities': User_communities})
     else:
         return HttpResponseRedirect("/community/login")
 	
 def communityForm(request):
     form = AddCommunity()
     return render(request, 'modal.html', {'form': form})
+	
+def JoinCommunity_view(request):
+    user = request.user
+    userModel = communityUsers.objects.filter(nickName=user)[0]
+    Comm = Communities.objects.get(communityHash=request.POST.get("community_Hash"))
+    Comm.communityMembers.add(userModel)
+    Comm.save()	
+    return render(request, 'tagSearch.html', {'form': "You joined successfully!"})
+	
+def LeftCommunity_view(request):
+    return render(request, 'tagSearch.html', {'form': form})
+
+def CheckMembership_view(request):
+    user = request.user
+    userModel = communityUsers.objects.filter(nickName=user)[0]
+    if Communities.objects.filter(communityMembers=userModel,communityHash=request.POST.get("community_Hash")):
+        return render_to_response('tagSearch.html', {'form': "Yes"})
+    else:
+        return render_to_response('tagSearch.html', {'form': "No"})
+	
+def VoteCommunity_view(request):
+    user = request.user
+    userModel = communityUsers.objects.filter(nickName=user)[0]
+    Comm = Communities.objects.get(communityHash=request.POST.get("community_Hash"))
+    Comm.communityPopularity.add(userModel)
+    return render(request, 'tagSearch.html', {'form': form})
 	
 def datatypeForm(request):
     form = AddDatatype()
@@ -53,18 +120,19 @@ def searchTag_view(request):
     txtSRC = request.GET.get('search_text')
     SEARCHPAGE = txtSRC	
     PARAMS = {
-		"action": "query",
+		"action":"wbsearchentities",
 		"format": "json",
-		"list": "search",
-		"srsearch": SEARCHPAGE
+		"limit": "10",
+        "language":"en",
+		"search": SEARCHPAGE
     }
     Srch = requests.Session()
-    URL = "https://en.wikipedia.org/w/api.php"
+    URL = "https://wikidata.org/w/api.php"
     Res = Srch.get(url=URL, params=PARAMS)
-    DATA = Res.json()['query']['search']
+    DATA = Res.json()['search']
     titles=""
     for tt in DATA:
-        titles+="#"+tt['title']
+        titles+="#"+tt['label']
     return render_to_response('tagSearch.html', {'form' : titles})
 
 
@@ -83,19 +151,26 @@ def CreateCommunity_view(request):
     comm.name = request.POST.get("Community_Name")
     comm.description = request.POST.get("Community_Description")
     salt = uuid.uuid4().hex
-    comm.communityHash = hashlib.sha256(salt.encode() + comm.name.encode()).hexdigest() + ':' + salt
+    commhash =  hashlib.sha256(salt.encode() + comm.name.encode()).hexdigest() + salt
+    comm.communityHash = commhash
     if request.POST.get("Private_Community"):
         comm.communityPrv = True
     else:
         comm.communityPrv = False
     comm.communityPhoto = image_path
-    comm.communityPopularity = 0
     comm.communityTags = request.POST.get("Community_Tags")
     comm.communityCreationDate = datetime.now()
     comm.communityCreator = communityUsers.objects.get(nickName=request.user)
     comm.save()
     comm.communityMembers.add(communityUsers.objects.get(nickName=request.user))
     comm.save()
+    Tags = saveTag_view(request.POST.get("Community_Tags"))
+    tagentry = CommunityTags()
+    relatedComm = Communities.objects.filter(communityHash=commhash)[0] 
+    tagentry.communityTag = relatedComm
+    tagentry.tagName = Tags["TITLE"] 
+    tagentry.tagItem = Tags["ITEM"]
+    tagentry.save() 
     return render_to_response('tagSearch.html', {'form' : "Community is created Successfully!"})
 		 
 def DatatypePage(request):
@@ -125,13 +200,21 @@ def CreateDatatype_view(request):
     dt = Datatypes()
     dt.name = request.POST.get("Datatype_Name")
     salt = uuid.uuid4().hex
-    dt.datatypeHash = hashlib.sha256(salt.encode() + dt.name.encode()).hexdigest() + ':' + salt
-    dt.communityPhoto = image_path
+    DtHash = hashlib.sha256(salt.encode() + dt.name.encode()).hexdigest() + salt
+    dt.datatypeHash = DtHash
+    dt.datatypePhoto = image_path
     dt.relatedCommunity=Communities.objects.get(communityHash=request.POST.get("community_Hash"))
     dt.datatypeTags = request.POST.get("Datatype_Tags")
     dt.datatypeCreationDate = datetime.now()
     dt.datatypeCreator = communityUsers.objects.get(nickName=request.user)
     dt.save()
+    Tags = saveTag_view(request.POST.get("Datatype_Tags"))
+    tagentry = DatatTypeTags()
+    relatedDt = Datatypes.objects.filter(datatypeHash=DtHash)[0] 
+    tagentry.datatypeTag = relatedDt
+    tagentry.tagName = Tags["TITLE"] 
+    tagentry.tagItem = Tags["ITEM"]
+    tagentry.save() 
     return render_to_response('tagSearch.html', {'form' : "Datatype is created Successfully!"}) 
 	
 def PostPage(request):
@@ -230,7 +313,11 @@ def SavePrimitives_view(request):
                 return render_to_response('tagSearch.html', {'form' : "Data is saved!"})
 
 def DeleteDatatypeFields_view(request):
+    CommunityHash = request.POST.get("CommunityHash")
+    DatatypeHash = request.POST.get("DatatypeHash")
+    Dt= Datatypes.objects.filter(datatypeHash=DatatypeHash)[0]
     name = request.POST.get("name")
+    HiddenPosts= Posts.objects.filter(propertyName=name,relatedDatatypes=Dt).delete()
     DatatypeFields.objects.filter(name=name).delete()
     return render_to_response('tagSearch.html', {'form' : "Datatype is Deleted Successfully!"})
 
@@ -333,7 +420,7 @@ def ReturnPostFields_view(request):
             types = fields.relatedPrimitives.name
             req = fields.fieldRequired
             show = fields.fronttableShow
-            context["Tags"]=AddTextAreaPost()
+            context["Tags"]=AddTagPost()
         iter += 1
     return render_to_response('entryReturnFields.html', {'form' : context})
 
@@ -351,7 +438,7 @@ def CreatePost_view(request):
     PostFields = DatatypeFields.objects.filter(relatedDatatype=Dt)
     salt = uuid.uuid4().hex
     PostHash = hashlib.sha256(salt.encode() + request.POST.get(PostFields[0].name).encode()).hexdigest() + salt
-    PostTime = datetime.now() 
+    PostTime = datetime.now()         
     for fields in PostFields:
         if (fields.relatedPrimitives.name == "Image" or fields.relatedPrimitives.name == "Audio" or fields.relatedPrimitives.name == "Video") and request.POST.get(fields.name) != "":
             p_image=request.FILES.get(fields.name)
@@ -364,7 +451,8 @@ def CreatePost_view(request):
             entry.entryHash = PostHash
             entry.postCreator = communityUsers.objects.get(nickName=request.user)
             entry.postCreationDate = PostTime
-            entry.save()
+            entry.postTag = request.POST.get("Tags")
+            entry.save()		
         elif request.POST.get(fields.name) != "":
             entry = Posts()
             entry.propertyName = fields.name
@@ -374,14 +462,26 @@ def CreatePost_view(request):
             entry.entryHash = PostHash
             entry.postCreator = communityUsers.objects.get(nickName=request.user)
             entry.postCreationDate = PostTime
+            entry.postTag = request.POST.get("Tags")
             entry.save()
         else:
             if fields.fieldRequired == True:
                 return render_to_response('tagSearch.html', {'form' : fields.name+" is required!"})
-    return render_to_response('tagSearch.html', {'form' : "The Entry is Created Successflly"})
+    Tags = saveTag_view(request.POST.get("Tags"))
+    tagentry = PostTags()
+    relatedPost = Posts.objects.filter(entryHash=PostHash)[0] 
+    tagentry.relatedPostTag = relatedPost
+    tagentry.tagName = Tags["TITLE"] 
+    tagentry.tagItem = Tags["ITEM"]
+    tagentry.save()  	
+    return render_to_response('tagSearch.html', {'form' : "The Entry is Created Successfully"})
     
+def DeletePost_view(request):
+    PostHash = request.POST.get("PostHash")	
+    Posts.objects.filter(entryHash=PostHash).delete()	
+    return render_to_response('tagSearch.html', {'form' : "The Entry is deleted Successfully"})
 	
-
+	
 def login_view(request):
     form = UsersLoginForm(request.POST or None)
     if form.is_valid():
@@ -420,10 +520,122 @@ def logout_view(request):
 	
 def profilePage(request):
     if request.user.is_authenticated:
-        userinfo=request.user
+        username=request.user
+        info = communityUsers.objects.filter(nickName=username)
+        CUser = communityUsers.objects.filter(nickName=username)[0]
+        Community_List = CUser.creator.all()
+        Datatype_List = CUser.datatypecreator.all()
+        Post_List = CUser.postcreator.all()
+        joined_Communities = CUser.members.all()
         return render(request, "profile.html", {
-	"user" : userinfo,
+	"user" : username,
+	"additional" : info,
 	"title" : "Login",
+	"Communities" : Community_List,
+	"Datatypes" : Datatype_List,
+	"Posts" : Post_List,
+	"Joined" : joined_Communities,	
 	})
+    else:
+        return HttpResponseRedirect("/community/login")
+
+def ReturnSearchFields_view(request):
+    CommunityHash = request.POST.get("CommunityHash")
+    DatatypeHash = request.POST.get("DatatypeHash")
+    Dt = Datatypes.objects.filter(datatypeHash=DatatypeHash)[0]
+    PostFields = DatatypeFields.objects.filter(relatedDatatype=Dt)
+    iter=0
+    context={}
+    for fields in PostFields:
+        if fields.enumerations is not None:
+            name = fields.name
+            types = fields.relatedPrimitives.name
+            req = fields.fieldRequired
+            show = fields.fronttableShow
+            enum = fields.enumerations
+            enumList = enum.split(",")				
+            context[fields.name]=AddEnumaratedSearch(en=enumList,nm=name)			
+        else:
+            if fields.relatedPrimitives.name == "Text":
+                context[fields.name]=AddTextSearch()
+            elif fields.relatedPrimitives.name == "TextArea":
+                context[fields.name]=AddTextAreaSearch()
+            elif fields.relatedPrimitives.name == "Audio":
+                context[fields.name]=AddAudioSearch(request.POST, request.FILES)
+            elif fields.relatedPrimitives.name == "Boolean":
+                context[fields.name]=AddBooleanSearch()
+            elif fields.relatedPrimitives.name == "Date":
+                context[fields.name]=AddDateSearch()
+            elif fields.relatedPrimitives.name == "DateTime":
+                context[fields.name]=AddDateTimeSearch()
+            elif fields.relatedPrimitives.name == "Decimal":
+                context[fields.name]=AddDecimalSearch()
+            elif fields.relatedPrimitives.name == "E-mail":
+                context[fields.name]=AddEmailSearch()
+            elif fields.relatedPrimitives.name == "Float":
+                context[fields.name]=AddFloatSearch()
+            elif fields.relatedPrimitives.name == "IP Address":
+                context[fields.name]=AddIpAddressSearch()
+            elif fields.relatedPrimitives.name == "Image":
+                context[fields.name]=AddImageSearch(request.POST, request.FILES)
+            elif fields.relatedPrimitives.name == "Integer":
+                context[fields.name]=AddIntegerSearch()
+            elif fields.relatedPrimitives.name == "Location":
+                context[fields.name]=AddLocationSearch()
+            elif fields.relatedPrimitives.name == "Time":
+                context[fields.name]=AddTimeSearch()
+            elif fields.relatedPrimitives.name == "URL":
+                context[fields.name]=AddUrlSearch()
+            elif fields.relatedPrimitives.name == "Video":
+                context[fields.name]=AddVideoSearch(request.POST, request.FILES)
+            name = fields.name
+            types = fields.relatedPrimitives.name
+            req = fields.fieldRequired
+            show = fields.fronttableShow
+            context["Tags"]=AddTagSearch()
+        iter += 1
+    return render_to_response('entrySearchFields.html', {'form' : context})
+	
+def ReturnEntrySearchFields_view(request):
+    CommunityHash = request.POST.get("CommunityHash")
+    DatatypeHash = request.POST.get("DatatypeHash")
+    DatatypeResult = Datatypes.objects.filter(datatypeHash=DatatypeHash)
+    Dtfields = DatatypeFields.objects.filter(relatedDatatype=DatatypeResult[0])
+    if request.user.is_authenticated:
+        querylist=[]
+        for fields in Dtfields:
+            subquery=""
+            if request.POST.get(fields.name+"_Value") != "":
+                if request.POST.get(fields.name+"_Condition") == "equals":
+                    subquery = "\"entryHash\" in (select \"entryHash\" from community_posts where \"propertyName\""+" = "+"'"+fields.name+"' AND \"propertyValue\""+" = "+"'"+request.POST.get(fields.name+"_Value")+"')"
+                    querylist.append(subquery)
+                elif request.POST.get(fields.name+"_Condition") == "not equal":
+                    subquery = "\"entryHash\" not in (select \"entryHash\" from community_posts where \"propertyName\""+" = "+"'"+fields.name+"' AND \"propertyValue\""+" = "+"'"+request.POST.get(fields.name+"_Value")+"')"
+                    querylist.append(subquery)
+                elif request.POST.get(fields.name+"_Condition") == "contains":
+                    subquery = "\"entryHash\" in (select \"entryHash\" from community_posts where \"propertyName\""+" = "+"'"+fields.name+"' AND \"propertyValue\""+" ~ "+"'"+request.POST.get(fields.name+"_Value")+"')"
+                    querylist.append(subquery)
+                elif request.POST.get(fields.name+"_Condition") == "not contain":
+                    subquery = "\"entryHash\" not in (select \"entryHash\" from community_posts where \"propertyName\""+" = "+"'"+fields.name+"' AND \"propertyValue\""+" ~ "+"'"+request.POST.get(fields.name+"_Value")+"')"
+                    querylist.append(subquery)
+                elif request.POST.get(fields.name+"_Condition") == "less than":
+                    subquery = "\"entryHash\" in (select \"entryHash\" from community_posts where \"propertyName\""+" = "+"'"+fields.name+"' AND CAST(\"propertyValue\" as INTEGER)"+" < "+"'"+request.POST.get(fields.name+"_Value")+"')"
+                    querylist.append(subquery)
+                elif request.POST.get(fields.name+"_Condition") == "more than":
+                    subquery = "\"entryHash\" in (select \"entryHash\" from community_posts where \"propertyName\""+" = "+"'"+fields.name+"' AND CAST(\"propertyValue\" as INTEGER)"+" > "+"'"+request.POST.get(fields.name+"_Value")+"')"
+                    querylist.append(subquery)
+        querystring = " and ".join(querylist)
+        DatatypeId = DatatypeResult[0].id		
+        RCommunity = Communities.objects.filter(communityHash=CommunityHash)
+        Primitive_List = DatatypeResult[0].datatypefields_set.all()
+        c = connection.cursor()
+        execution_string = 'select "entryHash",json_object_agg("propertyName","propertyValue") from (select "entryHash","propertyName","propertyValue" from community_posts where "relatedDatatypes_id"='+str(DatatypeId)+' and '+querystring+') S GROUP BY "entryHash"'
+        c.execute(execution_string)
+        posts=c.fetchall()
+        print(querystring)		
+        paginator = Paginator(posts, 5)
+        page = request.GET.get('page')
+        post_resp = paginator.get_page(page) 
+        return render(request, 'posts.html', {'post_resp': post_resp,'table_fields':Primitive_List,'Datatype_Id':DatatypeHash, 'Datatype_Name':DatatypeResult, 'Community_Name': RCommunity})
     else:
         return HttpResponseRedirect("/community/login")

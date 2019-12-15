@@ -169,7 +169,7 @@ class AddTextAreaPost(forms.Form):
 class AddImagePost(forms.Form):
     ImageEntry = forms.ImageField(label='')
     def __init__(self, *args, **kwargs):
-        super(AddImagePost, self).__init__(*args, **kwargs)
+        super(AddImagePost, self).__init__(*args, **kwargs)		
 	
 class AddAudioPost(forms.Form):
     AudioEntry = forms.FileField(label='')
@@ -258,3 +258,200 @@ class AddLocationPost(forms.Form):
     def __init__(self, *args, **kwargs):
         super(AddLocationPost, self).__init__(*args, **kwargs)
         self.fields['LocationEntry'].widget.attrs.update({'class': 'form-control'})
+
+class AddTagPost(forms.Form):
+    TagEntry = forms.CharField(widget=forms.TextInput(attrs={'class': 'special'}),label='')
+    def __init__(self, *args, **kwargs):
+        super(AddTagPost, self).__init__(*args, **kwargs)
+        self.fields['TagEntry'].widget.attrs.update({'class': 'form-control'})
+        self.fields['TagEntry'].widget.attrs.update({'data-role': 'tagsinput'})
+
+
+#######################################################################################################		
+###################################SEARCH FORMS########################################################
+#######################################################################################################
+
+class AddTextSearch(forms.Form):
+    Operand = ["","AND", "OR"]
+    ChoiceList = ["equals", "contains","not equal","not contain"]
+    Condition = forms.ChoiceField(choices=tuple(enumerate(ChoiceList)),label='')
+    TextEntry = forms.CharField(label='')
+    def __init__(self, *args, **kwargs):
+        super(AddTextSearch, self).__init__(*args, **kwargs)
+        self.fields['Condition'].widget.attrs.update({'class': 'form-control'})		
+        self.fields['TextEntry'].widget.attrs.update({'class': 'form-control'})		
+		
+class AddTextAreaSearch(forms.Form):
+    Operand = ["","AND", "OR"]
+    ChoiceList = ["equals", "contains","not equal","not contain"]
+    Condition = forms.ChoiceField(choices=tuple(enumerate(ChoiceList)),label='')
+    TextAreaEntry = forms.CharField(widget=forms.Textarea(attrs={'width':"50%", 'cols' : "50", 'rows': "2",}),label='')
+    def __init__(self, *args, **kwargs):
+        super(AddTextAreaSearch, self).__init__(*args, **kwargs)
+        self.fields['TextAreaEntry'].widget.attrs.update({'class': 'form-control'})
+        self.fields['Condition'].widget.attrs.update({'class': 'form-control'})
+	
+class AddImageSearch(forms.Form):
+    Operand = ["","AND", "OR"]
+    ChoiceList = ["equals", "contains","not equal","not contain"]
+    Condition = forms.ChoiceField(choices=tuple(enumerate(ChoiceList)),label='')
+    ImageEntry = forms.ImageField(label='')
+    def __init__(self, *args, **kwargs):
+        super(AddImageSearch, self).__init__(*args, **kwargs)		
+        self.fields['Condition'].widget.attrs.update({'class': 'form-control'})	
+		
+class AddAudioSearch(forms.Form):
+    Operand = ["","AND", "OR"]
+    ChoiceList = ["equals", "contains","not equal","not contain"]
+    Condition = forms.ChoiceField(choices=tuple(enumerate(ChoiceList)),label='')
+    AudioEntry = forms.FileField(label='')
+    def __init__(self, *args, **kwargs):
+        super(AddAudioSearch, self).__init__(*args, **kwargs)
+        self.fields['Condition'].widget.attrs.update({'class': 'form-control'})	
+		
+class AddVideoSearch(forms.Form):
+    Operand = ["","AND", "OR"]
+    ChoiceList = ["equals", "contains","not equal","not contain"]
+    Condition = forms.ChoiceField(choices=tuple(enumerate(ChoiceList)),label='')
+    VideoEntry = forms.FileField(label='')
+    def __init__(self, *args, **kwargs):
+        super(AddVideoSearch, self).__init__(*args, **kwargs)
+        self.fields['Condition'].widget.attrs.update({'class': 'form-control'})
+		
+class AddBooleanSearch(forms.Form):
+    Operand = ["","AND", "OR"]
+    ChoiceList = ["equals", "contains","not equal","not contain"]
+    Condition = forms.ChoiceField(choices=tuple(enumerate(ChoiceList)),label='')
+    BooleanEntry = forms.BooleanField(initial=False, required=False,label='')
+    def __init__(self, *args, **kwargs):
+        super(AddBooleanSearch, self).__init__(*args, **kwargs)
+        self.fields['BooleanEntry'].widget.attrs.update({'class': 'form-control d-flex justify-content-between'})
+        self.fields['Condition'].widget.attrs.update({'class': 'form-control'})
+		
+class AddEmailSearch(forms.Form):
+    Operand = ["","AND", "OR"]
+    ChoiceList = ["equals", "contains","not equal","not contain"]
+    Condition = forms.ChoiceField(choices=tuple(enumerate(ChoiceList)),label='')
+    EmailEntry = forms.EmailField(label='')
+    Op = forms.ChoiceField(choices=tuple(enumerate(Operand)),label='')
+    def __init__(self, *args, **kwargs):
+        super(AddEmailSearch, self).__init__(*args, **kwargs)
+        self.fields['EmailEntry'].widget.attrs.update({'class': 'form-control'})
+        self.fields['Condition'].widget.attrs.update({'class': 'form-control'})
+        self.fields['Op'].widget.attrs.update({'class': 'form-control'})
+		
+class AddIpAddressSearch(forms.Form):
+    Operand = ["","AND", "OR"]
+    ChoiceList = ["equals", "contains","not equal","not contain"]
+    Condition = forms.ChoiceField(choices=tuple(enumerate(ChoiceList)),label='')
+    IpAddressEntry = forms.GenericIPAddressField(label='')
+    def __init__(self, *args, **kwargs):
+        super(AddIpAddressSearch, self).__init__(*args, **kwargs)
+        self.fields['IpAddressEntry'].widget.attrs.update({'class': 'form-control'})
+        self.fields['Condition'].widget.attrs.update({'class': 'form-control'})
+		
+class AddUrlSearch(forms.Form):
+    Operand = ["","AND", "OR"]
+    ChoiceList = ["equals", "contains","not equal","not contain"]
+    Condition = forms.ChoiceField(choices=tuple(enumerate(ChoiceList)),label='')
+    UrlEntry = forms.URLField(label='')
+    def __init__(self, *args, **kwargs):
+        super(AddUrlSearch, self).__init__(*args, **kwargs)
+        self.fields['UrlEntry'].widget.attrs.update({'class': 'form-control'})
+        self.fields['Condition'].widget.attrs.update({'class': 'form-control'})
+		
+class AddDateSearch(forms.Form):
+    Operand = ["","AND", "OR"]
+    ChoiceList = ["equals", "after", "before"]
+    Condition = forms.ChoiceField(choices=tuple(enumerate(ChoiceList)),label='')
+    DateEntry = forms.DateField(label='')
+    def __init__(self, *args, **kwargs):
+        super(AddDateSearch, self).__init__(*args, **kwargs)
+        self.fields['DateEntry'].widget.attrs.update({'class': 'form-control','type': 'date'})
+        self.fields['Condition'].widget.attrs.update({'class': 'form-control'})
+		
+class AddTimeSearch(forms.Form):
+    Operand = ["","AND", "OR"]
+    ChoiceList = ["equals", "after", "before"]
+    Condition = forms.ChoiceField(choices=tuple(enumerate(ChoiceList)),label='')
+    TimeEntry = forms.TimeField(label='')
+    def __init__(self, *args, **kwargs):
+        super(AddTimeSearch, self).__init__(*args, **kwargs)
+        self.fields['TimeEntry'].widget.attrs.update({'class': 'form-control'})
+        self.fields['Condition'].widget.attrs.update({'class': 'form-control'})		
+		
+class AddDateTimeSearch(forms.Form):
+    Operand = ["","AND", "OR"]
+    ChoiceList = ["equals", "after", "before"]
+    Condition = forms.ChoiceField(choices=tuple(enumerate(ChoiceList)),label='')
+    DateTimeEntry = forms.DateTimeField(label='')
+    def __init__(self, *args, **kwargs):
+        super(AddDateTimeSearch, self).__init__(*args, **kwargs)
+        self.fields['DateTimeEntry'].widget.attrs.update({'class': 'form-control','type': 'datetime-local'})
+        self.fields['Condition'].widget.attrs.update({'class': 'form-control'})	
+		
+class AddIntegerSearch(forms.Form):
+    Operand = ["","AND", "OR"]
+    ChoiceList = ["equals", "less than","more than"]
+    Condition = forms.ChoiceField(choices=tuple(enumerate(ChoiceList)),label='')
+    IntegerEntry = forms.IntegerField(label='')
+    def __init__(self, *args, **kwargs):
+        super(AddIntegerSearch, self).__init__(*args, **kwargs)
+        self.fields['IntegerEntry'].widget.attrs.update({'class': 'form-control'})
+        self.fields['Condition'].widget.attrs.update({'class': 'form-control'})		
+		
+class AddDecimalSearch(forms.Form):
+    Operand = ["","AND", "OR"]
+    ChoiceList = ["equals", "less than","more than"]
+    Condition = forms.ChoiceField(choices=tuple(enumerate(ChoiceList)),label='')
+    DecimalEntry = forms.DecimalField(label='')
+    def __init__(self, *args, **kwargs):
+        super(AddDecimalSearch, self).__init__(*args, **kwargs)
+        self.fields['DecimalEntry'].widget.attrs.update({'class': 'form-control'})
+        self.fields['Condition'].widget.attrs.update({'class': 'form-control'})		
+		
+class AddFloatSearch(forms.Form):
+    Operand = ["","AND", "OR"]
+    ChoiceList = ["equals", "less than","more than"]
+    Condition = forms.ChoiceField(choices=tuple(enumerate(ChoiceList)),label='')
+    FloatEntry = forms.FloatField(label='')
+    def __init__(self, *args, **kwargs):
+        super(AddFloatSearch, self).__init__(*args, **kwargs)
+        self.fields['FloatEntry'].widget.attrs.update({'class': 'form-control'})
+        self.fields['Condition'].widget.attrs.update({'class': 'form-control'})
+		
+class AddEnumaratedSearch(forms.Form):	
+    def __init__(self, *args, **kwargs):
+        Operand = ["","AND", "OR"]	
+        enum = kwargs.pop('en')
+        name = kwargs.pop('nm')
+        super(AddEnumaratedSearch, self).__init__(*args, **kwargs)
+        ChoiceList = ["equals", "contains","not equal","not contain"]
+        self.fields['Condition'] = forms.ChoiceField(choices=tuple(enumerate(ChoiceList)),label='')
+        self.fields['EnumaratedEntry'] = forms.ChoiceField(choices=tuple(enumerate(enum)),label='')
+        self.fields['EnumaratedEntry'].widget.attrs.update({'class': 'form-control'})
+        self.fields['Condition'].widget.attrs.update({'class': 'form-control'})
+        contextName={}
+        contextName['name']=name
+        cnName = contextName.get(name,name)
+        super(AddEnumaratedSearch, self).add_prefix(cnName)
+        
+class AddLocationSearch(forms.Form):
+    Operand = ["","AND", "OR"]
+    ChoiceList = ["equals", "contains","not equal","not contain"]
+    Condition = forms.ChoiceField(choices=tuple(enumerate(ChoiceList)),label='')
+    LocationEntry = forms.CharField(label='')
+    def __init__(self, *args, **kwargs):
+        super(AddLocationSearch, self).__init__(*args, **kwargs)
+        self.fields['LocationEntry'].widget.attrs.update({'class': 'form-control'})
+        self.fields['Condition'].widget.attrs.update({'class': 'form-control'})		
+		
+class AddTagSearch(forms.Form):
+    Operand = ["","AND", "OR"]
+    ChoiceList = ["equals", "contains","not equal","not contain"]
+    Condition = forms.ChoiceField(choices=tuple(enumerate(ChoiceList)),label='')
+    TagEntry = forms.CharField(label='')
+    def __init__(self, *args, **kwargs):
+        super(AddTagSearch, self).__init__(*args, **kwargs)
+        self.fields['TagEntry'].widget.attrs.update({'class': 'form-control'})
+        self.fields['Condition'].widget.attrs.update({'class': 'form-control'})

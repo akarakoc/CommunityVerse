@@ -23,5 +23,12 @@ urlpatterns = [
 	path('DeleteDatatypeFields/', views.DeleteDatatypeFields_view, name = "DeleteDatatypeFields"),
 	path('EditDatatypeFields/', views.EditDatatypeFields_view, name = "EditDatatypeFields"),
 	path('ReturnPostFields/', views.ReturnPostFields_view, name = "ReturnPostFields"),
-	path('CreatePost/', views.CreatePost_view, name = "CreatePost"),	
+	path('CreatePost/', views.CreatePost_view, name = "CreatePost"),
+	path('DeletePost/', views.DeletePost_view, name = "DeletePost"),
+	path('JoinCommunity/', views.JoinCommunity_view, name = "JoinCommunity"),
+	path('LeftCommunity/', views.LeftCommunity_view, name = "LeftCommunity"),
+	path('VoteCommunity/', views.VoteCommunity_view, name = "VoteCommunity"),		
+	path('CheckMembership/', views.CheckMembership_view, name = "CheckMembership"),
+	path('ReturnSearchFields/', views.ReturnSearchFields_view, name = "ReturnSearchFields"), 
+	path('ReturnEntrySearchFields/', views.ReturnEntrySearchFields_view, name = "ReturnEntrySearchFields"),
 ]

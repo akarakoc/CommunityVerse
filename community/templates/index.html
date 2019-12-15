@@ -1,30 +1,40 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <button type="button" id="AddCommunity" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#CommunityModal">Add Community</button>
+  <button type="button" id="AddCommunity" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#CommunityModal">
+	<i class="fa fa-plus" aria-hidden="true"></i>
+	Add Community
+  </button>
   <br>
   <br>
-  <div id="community_list">
+  <div id="community_list" class="row">
   {% for comm in community_resp %}
 	<div class="card shadow mb-4">
         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-            <div id="CommunityName" class="left"><h6 class="m-0 font-weight-bold text-primary" ><button type="button" class="btn btn-none"><p id="Community" class="classC" hash="{{ comm.communityHash }}"><b>{{ comm.name }}</b></p></button></h6></div>
+            <div id="CommunityName" class="left">
+				<h6 class="m-0 font-weight-bold text-primary" >
+				<button type="button" class="btn btn-none">
+					<p id="Community" class="classC" hash="{{ comm.communityHash }}">
+						<b>{{ comm.name }}</b>
+					</p>
+					<i class="fa fa-star" style="font-size:18px"> {{ comm.communityPopularity.all|length }}</i>
+				</button>
+				</h6>
+			</div>
 			<div class="right">Created by: {{ comm.communityCreator }} at {{ comm.communityCreationDate }}</div>
-            <div class="dropdown no-arrow">
-                <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-					<i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                </a>
-                <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
-                <div class="dropdown-header">Dropdown Header:</div>
-					<a class="dropdown-item" href="#">Action</a>
-                    <a class="dropdown-item" href="#">Another action</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#">Something else here</a>
-                </div>
-				<button type="button" class="btn btn-primary">Join</button>
-            </div>
-        </div>
-        <!-- Card Body -->
+				<div class="dropdown no-arrow">
+					<button type="button" class="btn btn-primary" VoteCommunity="Yes" id="VoteCommunity" hash="{{ comm.communityHash }}">
+						<i class="fa fa-thumbs-up" aria-hidden="true"></i> 
+						Like
+					</button>
+					<button type="button" class="btn btn-primary" JoinCommunity="Yes" id="JoinCommunity" hash="{{ comm.communityHash }}">
+						<i class="fas fa-sign-in-alt"></i> 
+						Join
+					</button>
+					
+				</div>
+			</div>
+			<!-- Card Body -->
         <div class="card-body">
 			<div class="modal-body row">
 				<div class="col-md-6">
@@ -42,11 +52,10 @@
 					<b>Community Tags : </b><i><font class="primary">{{ comm.communityTags}}</font></i><br>
 				</div>
 			</div>
-		
-
 		</div>
     </div>    
 {% endfor %}
+</div>
 <!-- Modal -->
 	<div class="modal fade" id="CommunityModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-centered modal-lg" role="document">

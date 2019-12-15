@@ -6,14 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/sb-admin-2.min.css' %}">
-  <link rel="stylesheet" href="{% static 'css/sb-admin-2.min.css' %}">
-  <link rel="stylesheet" href="{% static 'css/jquery.tagsinput.css' %}">
+  <link rel="stylesheet" href="{% static 'css/tagsinput.css' %}">
   <link rel="stylesheet" href="{% static 'fontawesome-free/css/all.min.css' %}">
   
   <script type="text/javascript" src="{% static 'jquery/jquery.min.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/sb-admin-2.min.js' %}"></script>
-  <script type="text/javascript" src="{% static 'js/jquery.tagsinput.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/tagsinput.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/popper.js' %}"></script>
   <style>
   </style>
 </head>
@@ -80,6 +80,43 @@ $( document ).ready(function() {
 		$('#CommunityModal').modal('show');
 	});
 	
+	$( "[JoinCommunity]" ).click(function() {
+		var Chash = $(this).attr('hash');
+		console.log(Chash)
+		var data = new FormData();
+		data.append('community_Hash', Chash);
+		data.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
+		$.ajax({
+			type:'POST',
+			url: '/community/JoinCommunity/',
+			data: data,
+			processData: false,
+			contentType: false,
+			dataType: "html",
+			success: function(data, textStatus, jqXHR){
+				console.log(data)
+			}		
+		});
+	});
+	
+	$( "[VoteCommunity]" ).click(function() {
+		var Chash = $(this).attr('hash');
+		var data = new FormData();
+		data.append('community_Hash', Chash);
+		data.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
+		$.ajax({
+			type:'POST',
+			url: '/community/VoteCommunity/',
+			data: data,
+			processData: false,
+			contentType: false,
+			dataType: "html",
+			success: function(data, textStatus, jqXHR){
+				alert(data)
+			}		
+		});
+	});
+	
 	$( "#AddDatatype" ).click(function() {
 		var requestFormData={Form:"Yes"};
 		var communityForm = $.zResponse("/community/sendDatatypeForm",requestFormData);
@@ -105,7 +142,6 @@ $( document ).ready(function() {
 		$('#id_Community_Tags').val(data.trim());
 	}
 	$("body").on('keyup', "#id_Community_Name", tagSearch);
-	$('#id_Community_Tags').tagsInput({width:'auto'});
 	//////////////////////////////////////////////////
 	//////////////////////////////////////////////////
 	var tagSearchDt = function() {
@@ -124,7 +160,6 @@ $( document ).ready(function() {
 		$('#id_Datatype_Tags').val(data.trim());
 	}
 	$("body").on('keyup', "#id_Datatype_Name", tagSearchDt);
-	$('#id_Datatype_Tags').tagsInput({width:'auto'});
 	
 	
 	$('#createCommunity').submit(function(event){
@@ -174,9 +209,28 @@ $( document ).ready(function() {
 	
 	$( '.classC' ).click(function() {
 		var Cname = $(this).attr('hash');
-		var datatypeParam={showDataTypes:Cname};
-		var dt = $.zResponse("/community/sendDatatypePage",datatypeParam);
-		window.location = '/community/sendDatatypePage/?showDataTypes='+Cname;							
+		var data = new FormData();
+		data.append('community_Hash', Cname);
+		data.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
+		$.ajax({
+			type:'POST',
+			url: '/community/CheckMembership/',
+			data: data,
+			processData: false,
+			contentType: false,
+			dataType: "html",
+			success: function(data, textStatus, jqXHR){
+				if (data.trim()=="Yes"){
+					var datatypeParam={showDataTypes:Cname};
+					var dt = $.zResponse("/community/sendDatatypePage",datatypeParam);
+					window.location = '/community/sendDatatypePage/?showDataTypes='+Cname;	
+				}else{
+					alert("You should join first!")
+				}
+			}
+		});
+		
+								
 	});
 	
 	$( '.classD' ).click(function() {
@@ -278,6 +332,8 @@ $( document ).ready(function() {
 				if (data.trim() == "Datatype is Deleted Successfully!"){
 					jQuery('#'+this.idval).remove();
 				}
+				$('#AddPost').modal('hide');
+				window.location.reload();
 			}		
 		});
     });
@@ -299,6 +355,7 @@ $( document ).ready(function() {
 			dataType: "html",
 			success: function(data, textStatus, jqXHR){
 				alert(data)
+				window.location.reload();
 			}		
 		});
     });
@@ -355,6 +412,7 @@ $( document ).ready(function() {
 			success: function(data, textStatus, jqXHR){
 				alert(data);
 				$('#AddPost').modal('hide');
+				window.location.reload();
 			}		
 		});
     });
@@ -368,20 +426,109 @@ $( document ).ready(function() {
 			},
 			type: "GET",
             dataType: "html",
-            success: searchResultDt
+            success: searchResultPt
         });			
 	};	
-	function searchResultDt(data, textStatus, jqXHR){
-		$('#id_Datatype_Tags').val(data.trim());
+	function searchResultPt(data, textStatus, jqXHR){
+		$('#id_TagEntry').val(data.trim());
 	}
-	$("body").on('keyup', "#id_Datatype_Name", tagSearchPt);
-	$('#id_Datatype_Tags').tagsInput({width:'auto'});
+	$("body").on('keyup', "#id_TextEntry", tagSearchPt);
+	
+	$(document).on ("click", "#deletePost", function (event) {
+		PostHash=$(this).attr('hash');
+		event.preventDefault();
+		var data = new FormData();
+		data.append('PostHash', PostHash);
+		data.append('CommunityHash', '{{ Community_Name.0.communityHash}}');
+		data.append('DatatypeHash', '{{ Datatype_Name.0.datatypeHash }}');
+		data.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
+		$.ajax({
+			type:'POST',
+			url: '/community/DeletePost/',
+			data: data,
+			processData: false,
+			contentType: false,
+			dataType: "html",
+			success: function(data, textStatus, jqXHR){
+				alert(data)
+				window.location.reload();
+			}		
+		});
+    });
+	
+	$(document).on ("click", "#Search_Entry", function (event) {
+		event.preventDefault();
+		var data = new FormData();
+		data.append('CommunityHash', '{{ Community_Name.0.communityHash}}');
+		data.append('DatatypeHash', '{{ Datatype_Name.0.datatypeHash }}');
+		data.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
+		$.ajax({
+			type:'POST',
+			url: '/community/ReturnSearchFields/',
+			data: data,
+			processData: false,
+			contentType: false,
+			dataType: "html",
+			success: function(data, textStatus, jqXHR){				
+				$('#SearchPostBody').html(data);
+				$('#SearchPost').modal('show');
+			}		
+		});
+    });
+	
+	$(document).on ("click", "#SubmitSearch", function (event) {
+		event.preventDefault();
+		var i=0;
+		var ats=[];
+		$("div[searchInput='yes']").each(function() {
+				at = $(this).attr("id")
+				ats.push(at);
+		});
+		
+		for (var i = 0; i < ats.length; i++) {
+			console.log(ats[i]);
+			$("div[id='"+ats[i]+"']"+" > div > div > select").each(function() {
+				$(this).attr('name',ats[i]+"_Condition")
+			});
+			$("div[id='"+ats[i]+"']"+" > div > div > input").each(function() {
+				$(this).attr('name',ats[i]+"_Value")
+			});	
+		}
+		
+		$("option").each(function() {
+			(new_name=$(this).text())
+			$(this).attr('value',new_name)
+		});var csrftoken = $('input[name=csrfmiddlewaretoken]').val();
+		$('#SearchEntry').append('<input type="hidden" name="CommunityHash" value="{{ Community_Name.0.communityHash}}" />');
+		$('#SearchEntry').append('<input type="hidden" name="DatatypeHash" value="{{ Datatype_Name.0.datatypeHash }}" />');
+		$('#SearchEntry').append('<input type="hidden" name="csrfmiddlewaretoken" value="'+csrftoken+'" />');
+		$("#SearchEntry").attr('action', "/community/ReturnEntrySearchFields/").submit();
+		/*
+		var data = new FormData($('#SearchEntry').get(0));
+		data.append('CommunityHash', '{{ Community_Name.0.communityHash}}');
+		data.append('DatatypeHash', '{{ Datatype_Name.0.datatypeHash }}');
+		data.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
+		$.ajax({
+			type:'POST',
+			url: '/community/ReturnEntrySearchFields/',
+			data: data,
+			processData: false,
+			contentType: false,
+			dataType: "html",
+			success: function(data, textStatus, jqXHR){
+				$("#Datatypes_list").html(data)	
+				//$('#SearchPost').modal('hide');
+			}		
+		});
+		*/
+    });
+
 
 	
 });
 
 </script>
-<body>
+<body class="bg-light">
 
 <!-- Main Content -->
     <div id="content">
@@ -391,18 +538,7 @@ $( document ).ready(function() {
           <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
             <i class="fa fa-bars"></i>
           </button>
-
-          <!-- Topbar Search -->
-          <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
-            <div class="input-group">
-              <input id="searchBar" type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
-              <div class="input-group-append">
-                <button class="btn btn-primary" type="button">
-                  <i class="fas fa-search fa-sm"></i>
-                </button>
-              </div>
-            </div>
-          </form>
+		  <a href="http://18.219.3.42:8000/community/"><img src="{% static 'uploads/logo/logo.png' %}"></a>
 
           <!-- Topbar Navbar -->
           <ul class="navbar-nav ml-auto">

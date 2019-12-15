@@ -1,44 +1,42 @@
 {% extends "base.html" %} 
 
 {% block content %}
-  <button type="button" id="AddDatatype" class="btn btn-outline-secondary btn-sm">Add Datatype</button>
-  <div id="Datatypes_list">
-  <br>
-  <br>
-  <b>Community:</b> {{ community }}<!---{{dt_resp.0.relatedCommunity}}--->
-  <br>
-  <br>
+  <div class="p-3">
+	<button type="button" id="AddDatatype" class="btn btn-primary btn-sm"><i class="fa fa-plus" aria-hidden="true"></i> Add Datatype</button>
+  <br><br><b>{{ community }}</b><br><br> <!---{{dt_resp.0.relatedCommunity}}---> 
+  </div>
+  <div id="Datatypes_list" class="shadow p-3">
+  <div class="row p-3">
+		<div class="col-sm-5">
+			<img src="{{ community.communityPhoto }}" class="img-thumbnail"><br>
+		</div>
+		<div class="col-sm-7">
+			<p>{{ community.description }}</p><br>
+			<p>{{ community.communityTags }}</p>
+		</div>
+	</div>
   <div class="container">
-  <div class="row">
-  {% for dt in dt_resp %}
-  <div class="col-6">
-	<div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-			<div id="datatypeName" class="left"><h6 class="m-0 font-weight-bold text-primary" ><button type="button" class="btn btn-none"><p id="Datatype" class="classD" hash="{{ dt.datatypeHash }}"><b>{{ dt.name }}</b></p></button></h6></div>
-			<div class="right">{{ dt.datatypeCreationDate }} {{ dt.datatypeCreator }}</div>
-            <div class="dropdown no-arrow">
-                <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-					<i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                </a>
-				<button type="button" class="btn btn-primary">Go!</button>
-            </div>
-        </div>
-        <!-- Card Body -->
-        <div class="card-body">
-		<div class="modal-body row">
-			<div class="col-md-6">
-				<img src="{{ dt.datatypePhoto }}" class="img-thumbnail"><br>
-			</div>
-			<div class="col-md-6">
-			<b>Creation Date : </b><i><font class="primary">{{ dt.datatypeCreationDate}}</font></i><br>
-			<b>Created by : </b>{{ dt.datatypeCreator }}<i><font class="primary">{{ dt.datatypeCreator }}</font></i><br>
-			<b>Datatype Tags : </b><i><font class="primary">{{ dt.datatypeTags}}</font></i><br>			
+	<div class="row">
+		{% for dt in dt_resp %}
+		<div class="col-6">
+			<div class="card shadow mb-4">
+				<div class="card-header bg-white d-flex flex-row align-items-center justify-content-between">
+					<div class="right small"><b>{{ dt.name }}</b></div>
+					<div id="datatypeName" class="left small"><button type="button" class="btn btn-primary"><a id="Datatype" class="classD" hash="{{ dt.datatypeHash }}">Go!</a></button></div>			
+				</div>
+				<!-- Card Body -->
+				<div class="card-body">
+					<div class="row">
+						<div class="col-sm-12 small">
+							<b>Created by : </b><i><font class="primary">{{ dt.datatypeCreator }}</font></i><br>
+							<b>Creation Date : </b><i><font class="primary">{{ dt.datatypeCreationDate }}</font></i>			
+						</div>
+					</div>
 				</div>
 			</div>
-		</div>
+		</div>   
+		{% endfor %}
     </div>
-	</div>   
-{% endfor %}
   </div>
 <!-- Modal -->
 	<div class="modal fade" id="DatatypeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">

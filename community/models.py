@@ -24,7 +24,7 @@ class Communities(models.Model):
     communityHash = models.CharField(max_length=200, null=True, help_text='Enter community hash')	
     communityPrv = models.BooleanField(default=False)	
     communityPhoto = models.CharField(max_length=200, null=True, help_text='community photo')
-    communityPopularity = models.IntegerField(null=True)
+    communityPopularity = models.ManyToManyField(communityUsers, related_name='votes', help_text='Vote')
     communityCreator = models.ForeignKey(communityUsers, related_name='creator',on_delete=models.SET_NULL, null=True)
     communityMembers = models.ManyToManyField(communityUsers, related_name='members', help_text='Select members')
     communityTags = models.CharField(max_length=2000, null=True, help_text='Enter community Tags')
@@ -63,7 +63,7 @@ class Posts(models.Model):
     entryHash = models.CharField(max_length=200, null=True, help_text='Enter name of type')
     propertyName = models.CharField(max_length=200, null=True, help_text='Enter name of type')
     propertyValue = models.CharField(max_length=200, null=True, help_text='Enter name of type')
-    postCreator = models.ForeignKey(communityUsers,on_delete=models.SET_NULL, null=True)
+    postCreator = models.ForeignKey(communityUsers, related_name='postcreator', on_delete=models.SET_NULL, null=True)
     postCreationDate= models.DateTimeField(null=True)
     postTag= models.CharField(max_length=200, null=True, help_text='Enter Post Tags')
     def __str__(self):
@@ -71,30 +71,35 @@ class Posts(models.Model):
 
 class CommunityTags(models.Model):
     communityTag = models.ForeignKey(Communities, related_name='commTag',on_delete=models.SET_NULL, null=True)
-    tagName = models.CharField(max_length=200, null=True, help_text='Enter Community Tag')
+    tagName = models.CharField(max_length=2000, null=True, help_text='Enter Community Tag')
+    tagItem = models.CharField(max_length=2000, null=True, help_text='Enter Community Tag Item')
     def __str__(self):
         return self.tagName
 		
 class DatatTypeTags(models.Model):
     datatypeTag = models.ForeignKey(Datatypes, related_name='dataTag',on_delete=models.SET_NULL, null=True)
-    tagName = models.CharField(max_length=200, null=True, help_text='Enter Datatype Tag')
+    tagName = models.CharField(max_length=2000, null=True, help_text='Enter Datatype Tag')
+    tagItem = models.CharField(max_length=2000, null=True, help_text='Enter Community Tag Item')
     def __str__(self):
         return self.tagName
 		
 class PostTags(models.Model):
-    postTag = models.ForeignKey(Datatypes, related_name='postsTag',on_delete=models.SET_NULL, null=True)
-    tagName = models.CharField(max_length=200, null=True, help_text='Enter Post Tag')
+    relatedPostTag = models.ForeignKey(Posts, related_name='postsTag',on_delete=models.SET_NULL, null=True)
+    tagName = models.CharField(max_length=2000, null=True, help_text='Enter Post Tag')
+    tagItem = models.CharField(max_length=2000, null=True, help_text='Enter Community Tag Item')
     def __str__(self):
         return self.tagName
 		
 class UserTags(models.Model):
     userTag = models.ForeignKey(communityUsers, related_name='usersTag',on_delete=models.SET_NULL, null=True)
-    tagName = models.CharField(max_length=200, null=True, help_text='Enter Post Tag')
+    tagName = models.CharField(max_length=2000, null=True, help_text='Enter Post Tag')
+    tagItem = models.CharField(max_length=2000, null=True, help_text='Enter Community Tag Item')
     def __str__(self):
         return self.tagName
 
 class UserCircle(models.Model):
     circleOwner = models.OneToOneField(communityUsers, on_delete=models.SET_NULL, null=True)
     circleUsers = models.ManyToManyField(communityUsers, related_name='Followers', help_text='Select Members')
+    tagItem = models.CharField(max_length=2000, null=True, help_text='Enter Community Tag Item')
     def __str__(self):
         return self.circleOwner
